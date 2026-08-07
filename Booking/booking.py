@@ -128,13 +128,12 @@ class BookingBot(webdriver.Chrome):
         while True:
             card_container = self.find_elements(By.CSS_SELECTOR, 'div[data-testid="property-card"]')
             logging.info(f"Total hotels found: {len(card_container)}")
-            # previous_length = len(card_container)
             previous_length = len(Data)
             logging.info(f"Previous Length: {previous_length}")
             
             for card in card_container:
                     
-                logging.info("Extracting Data......")
+                logging.debug("Extracting Data......")
                 try:
                     link_element = card.find_element(By.CSS_SELECTOR, 'a[data-testid="property-card-desktop-single-image"]')
                     link = link_element.get_attribute('href')
@@ -184,13 +183,11 @@ class BookingBot(webdriver.Chrome):
                     "Rating": rating,
                     "Link": link
                 })
-                    # self.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             
             logging.info("Scrolling to load more........")       
             self.execute_script("window.scrollTo(0, document.body.scrollHeight);")
             time.sleep(2)
             
-            # new_card_container = self.find_elements(By.CSS_SELECTOR, 'div[data-testid="property-card"]')
             try:
                 load_more_btn = WebDriverWait(self, 2).until(
                     EC.element_to_be_clickable(
@@ -200,8 +197,7 @@ class BookingBot(webdriver.Chrome):
                 logging.info("Button Found.....")
                 load_more_btn.click()
                 time.sleep(4)
-                # new_card_container = self.find_elements(By.CSS_SELECTOR, 'div[data-testid="property-card"]')
-                # new_length = len(new_card_container)
+                
             except:
                 logging.info("No button Found")
                 pass
