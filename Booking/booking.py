@@ -139,11 +139,13 @@ class BookingBot(webdriver.Chrome):
                     link = link_element.get_attribute('href')
                 except NoSuchElementException:
                     link = "N/A"
-                
-                if link in seen:
+
+                dedupe_key = link.split("?")[0]
+
+                if dedupe_key in seen:
                     continue
-                
-                seen.add(link)   
+
+                seen.add(dedupe_key)
                 
                 try:
                     name_element = card.find_element(By.CSS_SELECTOR, 'div[data-testid="title"]')
@@ -197,7 +199,6 @@ class BookingBot(webdriver.Chrome):
                 logging.info("Button Found.....")
                 load_more_btn.click()
                 time.sleep(4)
-                
             except:
                 logging.info("No button Found")
                 pass
