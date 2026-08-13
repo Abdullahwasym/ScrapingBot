@@ -8,6 +8,8 @@ import time
 from selenium.common.exceptions import NoSuchElementException
 import pandas as pd
 import logging
+import sqlite3
+
 
 
 logging.basicConfig(
@@ -27,7 +29,24 @@ class BookingBot(webdriver.Chrome):
         super().__init__(options=chrome_options) 
         self.maximize_window()
         self.implicitly_wait(15)
+        self.connection = self.init_db()
 
+    def init_db(self):
+        connection=sqlite3.connect("Booking_data.db")
+        cursor=connection.cursor()
+        cursor.execute("""
+                CREATE TABLE IF NOT EXISTS hotels(
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT,
+                    address TEXT,
+                    certificate TEXT,
+                    rating TEXT,
+                    price TEXT,
+                    link TEXT UNIQUE
+                )
+        """)
+        connection.commit()
+        return connection
 
     def land_first_page(self):
         self.get(const.BASE_URL)
@@ -112,6 +131,17 @@ class BookingBot(webdriver.Chrome):
     def search_results(self):
         search_button=self.find_element(By.CSS_SELECTOR,'button[type="submit"]')
         search_button.click()
+    
+    
+    def save_to_db(self,hotel):
+        cursor=self.connection.cursor()
+        cursor.execute("""
+            INSERT OR IGNORE INTO hotels(name, address, certificate, rating, price, link) VALUES (?, ?, ?, ?, ?, ?)
+        """,(hotel["Name"],hotel["Address"],hotel["Sustainability certification"],hotel["Price"],
+             hotel["Rating"],hotel["Link"])
+        )
+            
+        self.connection.commit()
         
         
     def extract_data(self):
@@ -177,14 +207,16 @@ class BookingBot(webdriver.Chrome):
                 except NoSuchElementException:
                     price = "No"
                     
-                Data.append({
+                data_dict={
                     "Name": name,
                     "Address": address,
                     "Sustainability certification": certificate,
                     "Price": price,
                     "Rating": rating,
                     "Link": link
-                })
+                }
+                self.save_to_db(data_dict)
+                Data.append(data_dict)
             
             logging.info("Scrolling to load more........")       
             self.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -214,3 +246,4 @@ class BookingBot(webdriver.Chrome):
         df = pd.DataFrame(Data)
         df.to_excel("Data.xlsx", index=False)
         logging.info("File Saved!")
+        self.connection.close()

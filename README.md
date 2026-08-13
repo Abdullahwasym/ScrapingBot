@@ -1,85 +1,35 @@
-# Booking.com Hotel Data Scraper – Automated
+# Booking.com Hotel Scraper – Automated Bot
 
-An automated web scraping bot built with **Python** and **Selenium** that searches Booking.com for hotels based on custom parameters (destination, dates, guests, currency) and extracts structured hotel data into a clean Excel file.
+A Python-based web scraper that uses Selenium to automate hotel searches on Booking.com. It handles pop-ups, sets search parameters, scrolls through dynamic content, and saves hotel data in real-time.
+
+## How It Works
+
+1. **Automated Navigation:** Opens a Chrome browser, navigates to Booking.com, and automatically dismisses sign-in pop-ups.
+2. **Search Configuration:** Automates the selection of currency, destination, check-in/check-out dates, and guest/room quantities.
+3. **Dynamic Scraping:** Scrolls through the page to trigger lazy-loaded hotel cards and clicks the "Load more results" button until all listings are displayed.
+4. **Crash-Proof Saving:** Saves each hotel to a local **SQLite database** in real-time as it scrapes. If the browser crashes or gets blocked, all previously scraped data is perfectly safe.
+5. **Data Export:** Once scraping is complete, the data is exported to a clean Excel file.
 
 ## Features
 
-- Automates the full search flow: dismisses sign-in popup, sets currency, enters destination, selects check-in/check-out dates, and configures guests/rooms
-- Handles dynamic content loading via infinite scroll and "Load more results" button detection
-- Deduplicates listings to avoid repeated entries across scroll loads
-- Extracts for every hotel:
-  - Name
-  - Address
-  - Sustainability certification (Yes/No)
-  - Price
-  - Rating
-  - Direct booking link
-- Saves results to `Data.xlsx`
-- Full run logging to `app.log` for debugging and monitoring
-- Configurable via command-line arguments — no code changes needed to search a different city or date range
+- **Extracted Data:** Hotel Name, Address, Sustainability Certification, Rating, Price, and direct Link.
+- **Real-Time Database Storage:** Uses SQLite (`INSERT OR IGNORE`) to save data on the fly and prevent duplicate entries based on the URL.
+- **Robust Error Handling:** Uses `WebDriverWait` and `try-except` blocks to handle missing elements gracefully without breaking the loop.
 
 ## Tech Stack
 
 - Python 3
-- Selenium (Chrome WebDriver)
-- pandas (Excel export)
+- Selenium (Browser Automation)
+- SQLite3 (Real-time Database)
+- pandas / openpyxl (Excel Export)
 
 ## Project Structure
 
-```
-BOT/
+```text
+BookingScraper/
+├── .gitignore
+├── main.py (or booking_bot.py)
 ├── Booking/
-│   ├── __init__.py
-│   ├── booking.py       # BookingBot class — all automation logic
-│   └── constant.py      # Base URL and constants
-├── run.py               # Entry point with CLI arguments
+│   └── constant.py
 ├── requirements.txt
 └── README.md
-```
-
-## Installation
-
-```bash
-git clone https://github.com/Abdullahwasym/ScrapingBot.git
-cd ScrapingBot
-pip install -r requirements.txt
-```
-
-Requires Google Chrome installed (Selenium controls it via ChromeDriver).
-
-## Usage
-
-Run with default parameters (New York, 2026-08-19 to 2026-09-10, USD, 1 adult):
-
-```bash
-python run.py
-```
-
-Run with custom parameters:
-
-```bash
-python run.py --city "Dubai" --checkin 2026-09-01 --checkout 2026-09-05 --currency EUR --adults 2 --children 1 --rooms 1
-```
-
-### Available arguments
-
-| Argument      | Default      | Description                     |
-|---------------|--------------|----------------------------------|
-| `--city`      | New York     | Destination city to search       |
-| `--checkin`   | 2026-08-19   | Check-in date (YYYY-MM-DD)       |
-| `--checkout`  | 2026-09-10   | Check-out date (YYYY-MM-DD)      |
-| `--currency`  | USD          | Currency code (USD, EUR, PKR...) |
-| `--adults`    | 1            | Number of adults                 |
-| `--children`  | 0            | Number of children               |
-| `--rooms`     | 1            | Number of rooms                  |
-
-## Output
-
-Results are saved to `Data.xlsx` with columns: `Name`, `Address`, `Sustainability certification`, `Price`, `Rating`, `Link`.
-
-A single run has been tested to successfully extract 600+ hotel listings for a single search.
-
-## Notes
-
-- Booking.com's page structure may change over time, which can require selector updates in `booking.py`.
-- This project was built for demonstration/portfolio purposes. Please respect target websites' terms of service when scraping.
