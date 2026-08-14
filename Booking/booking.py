@@ -31,9 +31,11 @@ class BookingBot(webdriver.Chrome):
         self.implicitly_wait(15)
         self.connection = self.init_db()
 
+
     def init_db(self):
         connection=sqlite3.connect("Booking_data.db")
         cursor=connection.cursor()
+        cursor.execute("DROP TABLE IF EXISTS hotels")
         cursor.execute("""
                 CREATE TABLE IF NOT EXISTS hotels(
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -213,7 +215,7 @@ class BookingBot(webdriver.Chrome):
                     "Sustainability certification": certificate,
                     "Price": price,
                     "Rating": rating,
-                    "Link": link
+                    "Link": dedupe_key
                 }
                 self.save_to_db(data_dict)
                 Data.append(data_dict)
